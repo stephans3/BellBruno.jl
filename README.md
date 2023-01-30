@@ -30,7 +30,7 @@ bp = bell_poly( N_der;
 
 or simply
 ```julia
-    bp = bell_poly(N_der, save_on_disk = true)
+bp = bell_poly(N_der, save_on_disk = true)
 ```
 to save the files in folder `"bell_results/"`.
 
