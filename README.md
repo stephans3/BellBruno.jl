@@ -13,3 +13,40 @@ N_der = 10;              # Maximum order of Bell polynomial
 bp = bell_poly(N_der);   # Create bell polynomials
 bc = bell_coeff(bp);     # Compute bell coefficients
 ```
+
+
+**Computing and saving Bell polynomials**
+
+If you want to compute and save the Bell polynomials you may use
+
+```julia
+N_der = 20;
+path_2_folder = "my_folder_path"
+bp = bell_poly( N_der; 
+                save_on_disk=true, 
+                path_to_folder=path_2_folder, 
+                print_iteration=true)
+```
+
+or simply
+```julia
+    bp = bell_poly(N_der, save_on_disk = true)
+```
+to save the files in folder `"bell_results/"`.
+
+
+**Reading the Bell polynomials**
+
+The Bell polynomials can be read with
+
+```julia
+bp_new = read_bell_poly(path_to_folder=path_2_folder)
+```
+
+or if the standard folder `"bell_results/"` is used
+
+```julia
+bp_new = read_bell_poly()
+```
+
+

@@ -1,5 +1,3 @@
-
-
 function hasColumn(vec1::Vector{T}, vec2::Vector{T}) where T <:Real
    
     if vec1 == vec2
@@ -21,13 +19,115 @@ end
 
 
 """
-    bell_poly(N::Int64)
+    bell_poly_step(n, bp)
 
 Computes all Bell polynomials up to order of N.
 
+Returns the recent partial Bell polynomial as .
+"""
+function bell_poly_step(n, bp)
+    J1 = vcat(zeros(Int8,n-1),Int8(1))
+    Jn = vcat(Int8(n),zeros(Int8,n-1))
+
+    J_comp = [J1]
+    
+    for k=2:n-1
+
+        J_int = Vector{Int8}(undef,n) # Vector{Int8}(undef,8) # zeros(Int8,N,0)
+
+        for i=1:(n-k+1)
+            J_prev = bp[n-i+1][k-1]
+            
+            J_next = similar(J1)
+            m=length(J_prev[1,:])
+
+            if m==1
+                L = vcat(zeros(Int8,i-1),Int8(1),zeros(Int8,n-i))
+                J_next = vcat(J_prev,zeros(Int8,i)) + L
+            else
+                L = vcat(zeros(Int8,i-1,m),ones(Int8,1,m),zeros(Int8,n-i,m))
+                J_next = vcat(J_prev,zeros(Int8,i,m)) + L
+            end
+            
+            if i==1
+                J_int = J_next
+            else
+                for m1 = 1 : m
+                    if hasColumn(J_int, J_next[:,m1]) == false
+                        J_int = hcat(J_int, J_next[:,m1])
+                    end
+                end
+            end
+        end
+        J_comp = vcat(J_comp, [J_int])
+    end
+    J_comp = vcat(J_comp, [Jn])
+    return J_comp
+end
+
+
+
+
+"""
+bell_poly(Nmax :: Int64; 
+            bp=[[],[ones(Int8,1)]], 
+            save_on_disk=false,     
+            path_to_folder="bell_results/", 
+            print_iteration=false)
+
+Computes all Bell polynomials up to order of Nmax.
+
 Returns a Vector of N Bell polynomials (saved as vectors and matrices).
 """
-function bell_poly(N::Int64)
+function bell_poly(Nmax :: Int64; 
+                    bp=[[],[ones(Int8,1)]], 
+                    save_on_disk=false, 
+                    path_to_folder="bell_results/", 
+                    print_iteration=false)
+
+        max_digit = length(digits(Nmax))
+
+        if save_on_disk == true 
+            
+            if endswith(path_to_folder, "/") == false
+                path_to_folder = path_to_folder *"/"
+            end
+
+            if isdir(path_to_folder) == false
+                mkdir(path_to_folder)    # Make folder
+            end
+
+            println("Files are saved in folder: ", path_to_folder, "\n")
+
+        end
+
+        n_start = length(bp) 
+    
+        for n=n_start:Nmax
+            J_comp = bell_poly_step(n, bp)
+            
+            if save_on_disk == true
+                write_bell_poly(path_to_folder,J_comp,n,max_digit=max_digit)
+            end
+
+            bp = vcat(bp, [J_comp])
+
+            if print_iteration == true
+                day_now = Dates.Date(Dates.now())
+                time_now = Dates.Time(Dates.now())
+                iter_now = string(n, pad=max_digit)
+                println("Iteration: n = ",iter_now, " Day: ", day_now, " Time: ", time_now)
+            end
+
+        end
+    
+    return bp
+end
+
+
+
+
+function bell_poly_original(N::Int64)
     
     Minit = vcat(Int8(1),zeros(Int8,N-1))
     Mbell = [[zeros(Int8,N)], [Minit]]
