@@ -105,8 +105,9 @@ for ν=1 : N_der
 end
 
 using DelimitedFiles
-path_q = "q_results.txt"
-path_h = "h_results.txt"
+basepath = "examples/results/data/"
+path_q = basepath * "q_results.txt"
+path_h = basepath * "h_results.txt"
 
 open(path_q, "w") do io
     writedlm(io, q)
