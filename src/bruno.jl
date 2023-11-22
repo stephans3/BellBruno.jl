@@ -29,3 +29,4 @@ function simple_monomial_der(t, c, p, n :: Int64)
     c_new = c*reduce(*, arg_prod)
     return c_new * t^(p-n)
 end
+

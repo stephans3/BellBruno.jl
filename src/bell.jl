@@ -1,22 +1,3 @@
-function hasColumn(vec1::Vector{T}, vec2::Vector{T}) where T <:Real
-   
-    if vec1 == vec2
-        return true
-    end
-
-    return false
-end
-
-function hasColumn(mat::Matrix{T}, vec::Vector{T}) where T <:Real
-    for jdx in axes(mat, 2)
-        if mat[:,jdx] == vec
-            return true
-        end
-    end
-
-    return false
-end
-
 
 """
     bell_poly_step(n, bp)
@@ -33,7 +14,7 @@ function bell_poly_step(n, bp)
     
     for k=2:n-1
 
-        J_int = Vector{Int8}(undef,n) # Vector{Int8}(undef,8) # zeros(Int8,N,0)
+        J_int = Vector{Int8}(undef,n) 
 
         for i=1:(n-k+1)
             J_prev = bp[n-i+1][k-1]
@@ -48,17 +29,10 @@ function bell_poly_step(n, bp)
                 L = vcat(zeros(Int8,i-1,m),ones(Int8,1,m),zeros(Int8,n-i,m))
                 J_next = vcat(J_prev,zeros(Int8,i,m)) + L
             end
-            
-            if i==1
-                J_int = J_next
-            else
-                for m1 = 1 : m
-                    if hasColumn(J_int, J_next[:,m1]) == false
-                        J_int = hcat(J_int, J_next[:,m1])
-                    end
-                end
-            end
+
+            J_int = (i==1 ? J_next : hcat(J_int, J_next))
         end
+        J_int = unique(J_int,dims=2)
         J_comp = vcat(J_comp, [J_int])
     end
     J_comp = vcat(J_comp, [Jn])
@@ -69,23 +43,23 @@ end
 
 
 """
-bell_poly(Nmax :: Int64; 
+bell_poly(N:: Int64; 
             bp=[[],[ones(Int8,1)]], 
             save_on_disk=false,     
             path_to_folder="bell_results/", 
             print_iteration=false)
 
-Computes all Bell polynomials up to order of Nmax.
+Computes all Bell polynomials up to order of N.
 
 Returns a Vector of N Bell polynomials (saved as vectors and matrices).
 """
-function bell_poly(Nmax :: Int64; 
+function bell_poly(N:: Int64; 
                     bp=[[],[ones(Int8,1)]], 
                     save_on_disk=false, 
                     path_to_folder="bell_results/", 
                     print_iteration=false)
 
-        max_digit = length(digits(Nmax))
+        max_digit = length(digits(N))
 
         if save_on_disk == true 
             
@@ -103,11 +77,12 @@ function bell_poly(Nmax :: Int64;
 
         n_start = length(bp) 
     
-        for n=n_start:Nmax
+        for n=n_start:N
             J_comp = bell_poly_step(n, bp)
             
             if save_on_disk == true
                 write_bell_poly(path_to_folder,J_comp,n,max_digit=max_digit)
+                # write_bell_poly(path_to_folder,bp[n],n,max_digit=max_digit)
             end
 
             bp = vcat(bp, [J_comp])
@@ -125,99 +100,19 @@ function bell_poly(Nmax :: Int64;
 end
 
 
-
-
-function bell_poly_original(N::Int64)
-    
-    Minit = vcat(Int8(1),zeros(Int8,N-1))
-    Mbell = [[zeros(Int8,N)], [Minit]]
-    
-    
-    for n=2:N
-        J1 = vcat(zeros(Int8,n-1),Int8(1),zeros(Int8,N-n))
-        Jn = vcat(Int8(n),zeros(Int8,N-1))
-    
-        J_comp = [J1]
-        
-        for k=2:n-1
-    
-            J_int = Vector{Int8}(undef,8) # zeros(Int8,N,0)
-    
-            for i=1:(n-k+1)
-                J_prev = Mbell[n-i+1][k-1]
-                m=1
-                if typeof(J_prev) != typeof(Mbell[1][1])
-                    m = size(J_prev)[2]
-                    L = vcat(zeros(Int8,i-1,m),ones(Int8,1,m),zeros(Int8,N-i,m))
-                else
-                    L = vcat(zeros(Int8,i-1),Int8(1),zeros(Int8,N-i))
-                end
-         
-                J_next = J_prev + L
-    
-                if i==1
-                    J_int = J_next
-                else
-                    for m1 = 1 : m
-                        if hasColumn(J_int, J_next[:,m1]) == false
-                            J_int = hcat(J_int, J_next[:,m1])
-                        end
-                    end
-                end
-            end
-            J_comp = vcat(J_comp, [J_int])
-        end
-    
-        J_comp = vcat(J_comp, [Jn])
-        Mbell = vcat(Mbell, [J_comp])
-        
-    end
-    
-    return Mbell
-end
-
-function _bell_coeff(mat :: Matrix{Int8})
+function _bell_coeff(mat :: Matrix{<: Integer},n,k)
     res = Int64[];
-
     for col in eachcol(mat)
-        res = vcat(res, _bell_coeff(col[:]))
+        res = vcat(res, _bell_coeff(col[:],n,k))
     end
-
     return res;
 end
 
-function _bell_coeff_original(vec :: Vector{Int8})
-    res = 1;
-
-    N = length(vec)
-    k = sum(vec)
-    n = collect(1:N)' * vec
-
-    for idx in 1:(n-k+1)
-        elem = vec[idx]
-        res = res * factorial(elem)*factorial(idx)^elem
-    end
-
-    return round(Int64,factorial(n)/res);
+function _bell_coeff(v :: Vector{<: Integer},n,k)
+    a1 = mapreduce(i-> factorial(big(v[i]))*factorial(big(i))^v[i],*, 1:n-k)
+    a2 = factorial(big(n-1))*inv(a1)
+    return round(BigInt, a2)
 end
-
-function _bell_coeff(vec :: Vector{Int8})
-    res = BigInt(1);
-
-    N = length(vec)
-    #k = sum(vec)
-    n = collect(1:N)' * vec
-
-    for (idx, elem) in enumerate(vec)
-        fac_idx = factorial(big(idx));
-        fac_elem = factorial(big(elem));
-        res = res * fac_elem * fac_idx^elem
-    end
-
-    fac_n = factorial(big(n))    
-    return round(BigInt,fac_n/res)
-end
-
 
 """
     bell_coeff(bp)
@@ -227,10 +122,10 @@ Computes and returns the coefficients of all Bell polynomials saved in `bp`.
 function bell_coeff(bp)
     bc = [];
 
-    for (_, e1) in enumerate(bp)
+    for (n1, e1) in enumerate(bp)
         bc_out = [];
-        for (_, e2) in enumerate(e1)
-            bc_in = _bell_coeff(e2)
+        for (n2, e2) in enumerate(e1)
+            bc_in = _bell_coeff(e2,n1,n2)
             bc_out = vcat(bc_out, [bc_in])
         end
     
