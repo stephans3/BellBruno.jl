@@ -30,3 +30,53 @@ function simple_monomial_der(t, c, p, n :: Int64)
     return c_new * t^(p-n)
 end
 
+
+"""
+    faa_di_bruno(f_der, g, g_der, tgrid,bp,bc)
+
+Faà di Bruno's algorithm to find derivatives of function composition `f(g(t))`
+
+# Arguments
+
+`f_der`: derivative of outer function
+
+`g`: inner function
+
+`g_der`: derivative of inner function
+
+`tgrid`: sampling points (e.g. time grid)
+
+`bp`: Bell polynomial data
+
+`bc`: Bell coefficients data
+"""
+function faa_di_bruno(f_der, g, g_der, tgrid,bp,bc)
+    nt = length(tgrid)
+    N = length(bp)-1
+    ngrid = 1:N
+    g_data = g.(tgrid)
+    f_der_data = f_der.(g_data,ngrid')
+    g_der_data = g_der.(tgrid,ngrid')
+
+    q = zeros(nt, N);
+    for ν=1 : N
+        for k=1 : ν
+            fi = firstindex(bp[ν+1][k][1,:])
+            li = lastindex(bp[ν+1][k][1,:])
+            sol_prod = zeros(BigFloat,nt)   # Solution of the product π
+
+            for μ = fi : li
+                sol_prod_temp = zeros(BigFloat,nt)
+                a = bc[ν+1][k][μ]   # Coefficients
+                for (idx, _) in enumerate(tgrid)
+                    @views x = g_der_data[idx,:]
+                    sol_prod_temp[idx] = a * mapreduce(^, *, x, bp[ν+1][k][:,μ])
+                end
+                sol_prod = sol_prod + sol_prod_temp
+            end
+
+            q[:,ν] = q[:,ν] + big.(f_der_data[:,k]).*sol_prod
+        end
+    end 
+    return q
+end

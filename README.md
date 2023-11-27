@@ -6,7 +6,7 @@
 
 Compute [Bell polynomials](https://en.wikipedia.org/wiki/Bell_polynomials) for [Faà di Bruno's formula](https://en.wikipedia.org/wiki/Fa%C3%A0_di_Bruno's_formula).
 
-**Basic usage**
+## Basic usage
 
 ```julia
 N_der = 10;              # Maximum order of Bell polynomial
@@ -49,4 +49,56 @@ or if the standard folder `"bell_results/"` is used
 bp_new = read_bell_poly()
 ```
 
+## Quick Tutorial
 
+We are wish to find the derivatives of function composition
+
+$$ h(t) = f(g(t)) = \exp(p~\sin(t))$$
+
+up to the order of $N=10$. We assume $p=0.1$. 
+
+The derivative of the outer function is noted as
+
+$$ \frac{d^n}{dx^n} f(x) = p^{n} \exp(p~x)$$
+
+and the derivative of the inner function is noted as
+
+$$ \frac{d^n}{dt^n} g(t) = \sin(t+n~\pi/2).$$
+
+**Derivative of outer function**
+
+```julia
+p = 0.1;
+f_der(x,n) = p^n * exp(p*x) 
+```
+
+**Inner function and its derivatives**
+
+```julia
+g(t) = sin(t)
+g_der(t,n) = sin(t+n*π/2)
+```
+
+**Bell polynomial and coefficients data**
+
+```julia
+using BellBruno
+bp = bell_poly(10)
+bc = bell_coeff(bp)
+```
+
+**Sampling points and Faà di Bruno's formula**
+```julia
+tgrid = -π:0.01:2π # Sampling points
+diff_data = faa_di_bruno(f_der, g, g_der, tgrid,bp, bc)
+```
+
+The full listing [tutorial_example.jl can be found here](https://github.com/stephans3/BellBruno.jl/blob/master/examples/src/tutorial_example.jl).
+
+**Derivatives up to order 5**
+
+<img src="https://raw.githubusercontent.com/stephans3/BellBruno.jl/master/examples/assets/tutorial_1.png" width="450" height="300">
+
+**Derivatives up to order 10**
+
+<img src="https://raw.githubusercontent.com/stephans3/BellBruno.jl/master/examples/assets/tutorial_2.png" width="450" height="300">

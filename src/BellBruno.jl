@@ -12,6 +12,7 @@ include("bell.jl")
 
 export power_series, power_series_der
 export simple_monomial, simple_monomial_der
+export faa_di_bruno
 include("bruno.jl")
 
 end
