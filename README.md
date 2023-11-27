@@ -97,8 +97,8 @@ The full listing [tutorial_example.jl can be found here](https://github.com/step
 
 **Derivatives up to order 5**
 
-<img src="https://raw.githubusercontent.com/stephans3/BellBruno.jl/master/examples/assets/tutorial_1.png" width="450" height="300">
+<img src="https://raw.githubusercontent.com/stephans3/BellBruno.jl/main/examples/results/images/tutorial_1.png" width="450" height="300">
 
 **Derivatives up to order 10**
 
-<img src="https://raw.githubusercontent.com/stephans3/BellBruno.jl/master/examples/assets/tutorial_2.png" width="450" height="300">
+<img src="https://raw.githubusercontent.com/stephans3/BellBruno.jl/main/examples/results/images/tutorial_2.png" width="450" height="300">
