@@ -102,3 +102,37 @@ The full listing [tutorial_example.jl can be found here](https://github.com/step
 **Derivatives up to order 10**
 
 <img src="https://raw.githubusercontent.com/stephans3/BellBruno.jl/main/examples/results/images/tutorial_2.png" width="450" height="300">
+
+## Citation
+
+Please cite our work :blush:
+
+- Article describing the algorithm:
+
+```bibtex
+@article{scholz2024fast,
+  title={Fast computation of function composition derivatives for flatness-based control of diffusion problems},
+  author={Scholz, Stephan and Berger, Lothar},
+  journal={Journal of Mathematics in Industry},
+  volume={14},
+  number={1},
+  pages={15},
+  year={2024},
+  publisher={Springer}
+}
+```
+
+- Source Code on Zenodo:
+
+```bibtex
+@software{stephan_scholz_2023_7685927,
+  author       = {Stephan Scholz},
+  title        = {stephans3/BellBruno.jl: Add to Zenodo},
+  month        = feb,
+  year         = 2023,
+  publisher    = {Zenodo},
+  version      = {v0.2.0-zenodo},
+  doi          = {10.5281/zenodo.7685927},
+  url          = {https://doi.org/10.5281/zenodo.7685927},
+}
+```
